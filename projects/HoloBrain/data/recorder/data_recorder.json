@@ -1,0 +1,383 @@
+{
+    "topic_spec": {
+        "/middle_camera/aligned_depth_to_color/image_raw/compressed_data": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/middle/depth_image/image_raw",
+            "frame_rate_monitor": {
+                "min_hz": 25.0,
+                "max_hz": 10000000000.0,
+                "window_size": 10000
+            }
+        },
+        "/middle_camera/color/image_raw/compressed_data": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/middle/color_image/image_raw",
+            "frame_rate_monitor": {
+                "min_hz": 25.0,
+                "max_hz": 10000000000.0,
+                "window_size": 10000
+            }
+        },
+        "/agilex/middle_camera/color/camera_info": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/middle/color_image/camera_info",
+            "frame_rate_monitor": null
+        },
+        "/agilex/middle_camera/aligned_depth_to_color/camera_info": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/middle/depth_image/camera_info",
+            "frame_rate_monitor": null
+        },
+        "/agilex/middle_camera/extrinsics/depth_to_color": {
+            "stamp_type": "recorder_clock",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 1,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/middle/depth_image/tf",
+            "frame_rate_monitor": null
+        },
+        "/left_camera/aligned_depth_to_color/image_raw/compressed_data": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/left/depth_image/image_raw",
+            "frame_rate_monitor": {
+                "min_hz": 25.0,
+                "max_hz": 10000000000.0,
+                "window_size": 10000
+            }
+        },
+        "/left_camera/color/image_raw/compressed_data": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/left/color_image/image_raw",
+            "frame_rate_monitor": {
+                "min_hz": 25.0,
+                "max_hz": 10000000000.0,
+                "window_size": 10000
+            }
+        },
+        "/agilex/left_camera/color/camera_info": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/left/color_image/camera_info",
+            "frame_rate_monitor": null
+        },
+        "/agilex/left_camera/aligned_depth_to_color/camera_info": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/left/depth_image/camera_info",
+            "frame_rate_monitor": null
+        },
+        "/agilex/left_camera/extrinsics/depth_to_color": {
+            "stamp_type": "recorder_clock",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 1,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/left/depth_image/tf",
+            "frame_rate_monitor": null
+        },
+        "/right_camera/aligned_depth_to_color/image_raw/compressed_data": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/right/depth_image/image_raw",
+            "frame_rate_monitor": {
+                "min_hz": 25.0,
+                "max_hz": 10000000000.0,
+                "window_size": 10000
+            }
+        },
+        "/right_camera/color/image_raw/compressed_data": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/right/color_image/image_raw",
+            "frame_rate_monitor": {
+                "min_hz": 25.0,
+                "max_hz": 10000000000.0,
+                "window_size": 10000
+            }
+        },
+        "/agilex/right_camera/color/camera_info": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/right/color_image/camera_info",
+            "frame_rate_monitor": null
+        },
+        "/agilex/right_camera/aligned_depth_to_color/camera_info": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/right/depth_image/camera_info",
+            "frame_rate_monitor": null
+        },
+        "/agilex/right_camera/extrinsics/depth_to_color": {
+            "stamp_type": "recorder_clock",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 1,
+                "history": 1
+            },
+            "rename_topic": "/observation/cameras/right/depth_image/tf",
+            "frame_rate_monitor": null
+        },
+        "/master/joint_left": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/robot_state/left_master/joint",
+            "frame_rate_monitor": null
+        },
+        "/master/status_left": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/robot_state/left_master/status",
+            "frame_rate_monitor": null
+        },
+        "/puppet/joint_left": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/robot_state/left/joint",
+            "frame_rate_monitor": null
+        },
+        "/puppet/end_pose_left": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/robot_state/left/end_pose",
+            "frame_rate_monitor": null
+        },
+        "/puppet/status_left": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/robot_state/left/status",
+            "frame_rate_monitor": null
+        },
+        "/master/joint_right": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/robot_state/right_master/joint",
+            "frame_rate_monitor": null
+        },
+        "/master/status_right": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/robot_state/right_master/status",
+            "frame_rate_monitor": null
+        },
+        "/puppet/joint_right": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/robot_state/right/joint",
+            "frame_rate_monitor": null
+        },
+        "/puppet/end_pose_right": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/robot_state/right/end_pose",
+            "frame_rate_monitor": null
+        },
+        "/puppet/status_right": {
+            "stamp_type": "msg_header_stamp",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 2,
+                "history": 1
+            },
+            "rename_topic": "/observation/robot_state/right/status",
+            "frame_rate_monitor": null
+        },
+        "/tf_static": {
+            "stamp_type": "recorder_clock",
+            "qos_profile": {
+                "depth": 10,
+                "reliability": 1,
+                "durability": 1,
+                "history": 1
+            },
+            "rename_topic": null,
+            "frame_rate_monitor": null
+        }
+    },
+    "default_topic_spec": {
+        "stamp_type": "msg_header_stamp",
+        "qos_profile": {
+            "depth": 1024,
+            "reliability": 1,
+            "durability": 2,
+            "history": 1
+        },
+        "rename_topic": null,
+        "frame_rate_monitor": null
+    },
+    "include_patterns": [
+        "/middle_camera/color/image_raw/compressed_data",
+        "/middle_camera/aligned_depth_to_color/image_raw/compressed_data",
+        "/agilex/middle_camera/color/camera_info",
+        "/agilex/middle_camera/aligned_depth_to_color/camera_info",
+        "/agilex/middle_camera/extrinsics/depth_to_color",
+        "/left_camera/color/image_raw/compressed_data",
+        "/left_camera/aligned_depth_to_color/image_raw/compressed_data",
+        "/agilex/left_camera/color/camera_info",
+        "/agilex/left_camera/aligned_depth_to_color/camera_info",
+        "/agilex/left_camera/extrinsics/depth_to_color",
+        "/right_camera/color/image_raw/compressed_data",
+        "/right_camera/aligned_depth_to_color/image_raw/compressed_data",
+        "/agilex/right_camera/color/camera_info",
+        "/agilex/right_camera/aligned_depth_to_color/camera_info",
+        "/agilex/right_camera/extrinsics/depth_to_color",
+        "/master/joint_left",
+        "/master/status_left",
+        "/puppet/joint_left",
+        "/puppet/end_pose_left",
+        "/puppet/status_left",
+        "/master/joint_right",
+        "/master/status_right",
+        "/puppet/joint_right",
+        "/puppet/end_pose_right",
+        "/puppet/status_right",
+        "/robot/left/takeover_muxer/control_mode",
+        "/robot/left/takeover_muxer/events",
+        "/robot/right/takeover_muxer/control_mode",
+        "/robot/right/takeover_muxer/events",
+        "/tf_static",
+        "/tf",
+        "/diagnostics",
+        "/rosout",
+        "/parameter_events"
+    ],
+    "exclude_patterns": null,
+    "no_discovery": false,
+    "max_cache_size": 268435456,
+    "wait_for_topics": [
+        "/middle_camera/color/image_raw/compressed_data",
+        "/puppet/end_pose_left",
+        "/left_camera/color/image_raw/compressed_data",
+        "/right_camera/aligned_depth_to_color/image_raw/compressed_data",
+        "/left_camera/aligned_depth_to_color/image_raw/compressed_data",
+        "/puppet/joint_right",
+        "/right_camera/color/image_raw/compressed_data",
+        "/middle_camera/aligned_depth_to_color/image_raw/compressed_data",
+        "/puppet/end_pose_right",
+        "/puppet/joint_left"
+    ],
+    "static_topics": [
+        "/agilex/middle_camera/extrinsics/depth_to_color",
+        "/agilex/left_camera/extrinsics/depth_to_color",
+        "/agilex/right_camera/extrinsics/depth_to_color",
+        "/tf_static"
+    ],
+    "max_timestamp_difference_ns": 500000000
+}

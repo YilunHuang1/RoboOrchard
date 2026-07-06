@@ -1,0 +1,10 @@
+{
+    "mode": "eye_in_hand",
+    "end_effector_frame_name": "link6",
+    "camera_frame_name": "left_camera_color_optical_frame",
+    "aruco_marker_frame_name": "marker_frame",
+    "base_frame_name": "base_link",
+    "aruco_marker_pose_topic_name": "/handeye_calib/aruco_single_node/pose",
+    "end_effector_pose_topic_name": "/master/end_pose_left",
+    "result_file": "/home/users/vita-4090/RoboOrchard/projects/HoloBrain/handeye_calib/left_camera_handeye_result.json"
+}

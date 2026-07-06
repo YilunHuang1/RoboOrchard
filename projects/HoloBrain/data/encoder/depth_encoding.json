@@ -1,0 +1,15 @@
+{
+    "codec": {
+        "__config_type__": "robo_orchard_data_ros2.codec.image.codec:PngCodecConfig",
+        "class_type": "robo_orchard_data_ros2.codec.image.codec:PngCodec",
+        "compress_level": 1
+    },
+    "num_workers": 8,
+    "max_queue_size": 128,
+    "topic_mapping": {
+        "/agilex/left_camera/aligned_depth_to_color/image_raw": "/left_camera/aligned_depth_to_color/image_raw/compressed_data",
+        "/agilex/middle_camera/aligned_depth_to_color/image_raw": "/middle_camera/aligned_depth_to_color/image_raw/compressed_data",
+        "/agilex/right_camera/aligned_depth_to_color/image_raw": "/right_camera/aligned_depth_to_color/image_raw/compressed_data"
+    },
+    "queue_full_action": "drop_first"
+}

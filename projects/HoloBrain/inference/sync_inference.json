@@ -1,0 +1,66 @@
+{
+    "robot_config": {
+        "num_joints": 7,
+        "joint_names": [
+            "joint1",
+            "joint2",
+            "joint3",
+            "joint4",
+            "joint5",
+            "joint6",
+            "joint7"
+        ],
+        "joint_velocities": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            50.0
+        ],
+        "joint_efforts": [
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.5
+        ]
+    },
+    "observation_config": {
+        "color_topics": {
+            "left_color": "/agilex/left_camera/color/image_rect_raw",
+            "right_color": "/agilex/right_camera/color/image_rect_raw",
+            "middle_color": "/agilex/middle_camera/color/image_raw"
+        },
+        "depth_topics": {
+            "left_depth": "/agilex/left_camera/aligned_depth_to_color/image_raw",
+            "right_depth": "/agilex/right_camera/aligned_depth_to_color/image_raw",
+            "middle_depth": "/agilex/middle_camera/aligned_depth_to_color/image_raw"
+        },
+        "intrinsic_topics": {
+            "left_intrinsic": "/agilex/left_camera/color/camera_info",
+            "right_intrinsic": "/agilex/right_camera/color/camera_info",
+            "middle_intrinsic": "/agilex/middle_camera/color/camera_info"
+        },
+        "arm_state_topics": {
+            "left_arm_state": "/puppet/joint_left",
+            "right_arm_state": "/puppet/joint_right"
+        }
+    },
+    "control_config": {
+        "left_arm_control_topic": "/left_algo_cmd",
+        "right_arm_control_topic": "/right_algo_cmd",
+        "control_frequency": 200.0,
+        "reset_arm_service_name": [
+            "/robot/left/reset_ctrl",
+            "/robot/right/reset_ctrl"
+        ]
+    },
+    "server_url": "http://localhost:6050/sem",
+    "infer_frequency": 3.0,
+    "delay_horizon": 32,
+    "max_delay_horizon": null
+}

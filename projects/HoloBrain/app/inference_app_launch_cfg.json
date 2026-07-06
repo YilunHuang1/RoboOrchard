@@ -1,0 +1,67 @@
+{
+    "workspace": "/data/holobrain/",
+    "foxglove": {
+        "host": "https://app.foxglove.dev",
+        "remote_file_layout_id": "",
+        "remote_file_endpoint_template": "{host}/?{query}",
+        "websocket_layout_id": "",
+        "websocket_ds": "foxglove-websocket",
+        "websocket_url": "ws://localhost:8765",
+        "width": null,
+        "height": 960,
+        "display_type": "link_button"
+    },
+    "app_cache_directory": ".cache/robo_orchard_inference_app",
+    "ros_bridge": {
+        "host": "localhost",
+        "port": 9090,
+        "takeover_service_name": [
+            "/robot/left/takeover_muxer/trigger_takeover",
+            "/robot/right/takeover_muxer/trigger_takeover"
+        ],
+        "release_service_name": [
+            "/robot/left/takeover_muxer/release_control",
+            "/robot/right/takeover_muxer/release_control"
+        ],
+        "stop_service_name": [
+            "/robot/left/takeover_muxer/stop",
+            "/robot/right/takeover_muxer/stop"
+        ],
+        "enable_inference_service_name": [
+            "/robot/inference_service/enable"
+        ],
+        "disable_inference_service_name": [
+            "/robot/inference_service/disable"
+        ],
+        "inference_node_candidates": [
+            "/robot/inference_service/sync_node",
+            "/robot/inference_service/async_node"
+        ],
+        "enable_arm_service_name": [
+            "/robot/left_master/enable_ctrl",
+            "/robot/right_master/enable_ctrl"
+        ],
+        "reset_arm_service_name": [
+            "/robot/left_master/reset_ctrl",
+            "/robot/left/reset_ctrl",
+            "/robot/right_master/reset_ctrl",
+            "/robot/right/reset_ctrl"
+        ],
+        "master_status_topics": {
+            "left": "/master/status_left",
+            "right": "/master/status_right"
+        },
+        "master_enable_ctrl_service_names": {
+            "left": "/robot/left_master/enable_ctrl",
+            "right": "/robot/right_master/enable_ctrl"
+        },
+        "recorder_name": "/mcap_recorder_service",
+        "record_handeye_calib_service_name": "/handeye_calib/record_data",
+        "save_handeye_calib_service_name": "/handeye_calib/save_data"
+    },
+    "file_server_uri": "http://localhost:8000",
+    "ui_control": {
+        "start_keyboard": "s",
+        "stop_keyboard": "f"
+    }
+}
