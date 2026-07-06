@@ -29,9 +29,9 @@ def main():
         codec=JpegCodecConfig(),
         num_workers=8,
         topic_mapping={
-            f"{camera_namespace}/left_camera/color/image_raw": "/left_camera/color/image_raw/compressed_data",  # noqa: E501
+            f"{camera_namespace}/left_camera/color/image_rect_raw": "/left_camera/color/image_raw/compressed_data",  # noqa: E501
             f"{camera_namespace}/middle_camera/color/image_raw": "/middle_camera/color/image_raw/compressed_data",  # noqa: E501
-            f"{camera_namespace}/right_camera/color/image_raw": "/right_camera/color/image_raw/compressed_data",  # noqa: E501
+            f"{camera_namespace}/right_camera/color/image_rect_raw": "/right_camera/color/image_raw/compressed_data",  # noqa: E501
         },
         max_queue_size=128,
     )

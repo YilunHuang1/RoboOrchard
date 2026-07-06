@@ -14,6 +14,8 @@
 # implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+"""Slave-arm-only launch for model inference (no master arm)."""
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
@@ -21,31 +23,30 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    """Launch the complete human takeover system, including the muxer and the hardware controller."""  # noqa: E501
-    # --- Declare Launch Arguments ---
+    """Launch takeover muxers and slave arm controllers for inference."""
     left_algo_topic_arg = DeclareLaunchArgument(
         "left_algo_topic",
         default_value="/left_algo_cmd",
         description="Algorithm command topic for the left arm.",
     )
-    left_master_can_port_arg = DeclareLaunchArgument(
-        "left_master_can_port",
-        default_value="can_left_mst",
-        description="CAN port for the left master arm.",
+    right_algo_topic_arg = DeclareLaunchArgument(
+        "right_algo_topic",
+        default_value="/right_algo_cmd",
+        description="Algorithm command topic for the right arm.",
     )
     left_slave_can_port_arg = DeclareLaunchArgument(
         "left_slave_can_port",
         default_value="can_left",
         description="CAN port for the left slave arm.",
     )
+    right_slave_can_port_arg = DeclareLaunchArgument(
+        "right_slave_can_port",
+        default_value="can_right",
+        description="CAN port for the right slave arm.",
+    )
 
     enable_mit_control_mode_arg = DeclareLaunchArgument(
         "enable_mit_control_mode",
-        default_value="true",
-        description="Whether enable mit control mode or not.",
-    )
-    enable_master_mit_control_mode_arg = DeclareLaunchArgument(
-        "enable_master_mit_control_mode",
         default_value="true",
         description="Whether enable mit control mode or not.",
     )
@@ -56,16 +57,13 @@ def generate_launch_description():
         description="Replay time (in seconds)",
     )
 
-    # --- Node Definitions ---
-
-    # 1. Takeover Muxer Node
     left_takeover_muxer_node = Node(
         package="robo_orchard_teleop_ros2",
         executable="take_over",
         name="robot_left_takeover_muxer",
         namespace="/robot/left/takeover_muxer",
         output="screen",
-        emulate_tty=True,  # Ensures logs are displayed properly
+        emulate_tty=True,
         parameters=[
             {
                 "message_type": "sensor_msgs/msg/JointState",
@@ -77,31 +75,26 @@ def generate_launch_description():
             }
         ],
     )
-    # 2. Piper Hardware Controller Node
-    left_master_controller_node = Node(
-        package="robo_orchard_piper_ros2",
-        executable="single_ctrl",
-        name="robot_left_master_controller",
-        namespace="/robot/left_master",
+
+    right_takeover_muxer_node = Node(
+        package="robo_orchard_teleop_ros2",
+        executable="take_over",
+        name="robot_right_takeover_muxer",
+        namespace="/robot/right/takeover_muxer",
         output="screen",
         emulate_tty=True,
         parameters=[
             {
-                "can_port": LaunchConfiguration("left_master_can_port"),
-                "auto_enable_arm_ctrl": True,
-                "gripper_exist": True,
-                "enable_mit_ctrl": LaunchConfiguration(
-                    "enable_master_mit_control_mode"
-                ),
+                "message_type": "sensor_msgs/msg/JointState",
+                "algo_topic": LaunchConfiguration("right_algo_topic"),
+                "override_topic": "/master/joint_right",
+                "output_topic": "/robot/right/joint_cmd",
+                "override_mode_behavior": "forward",
+                "replay_time_s": LaunchConfiguration("replay_time_s"),
             }
         ],
-        remappings=[
-            ("/robot/left_master/joint_cmd", "/robot/left/joint_cmd"),
-            ("/robot/left_master/status", "/master/status_left"),
-            ("/robot/left_master/ee_pose", "/master/end_pose_left"),
-            ("/robot/left_master/joint_state", "/master/joint_left"),
-        ],
     )
+
     left_controller_node = Node(
         package="robo_orchard_piper_ros2",
         executable="single_ctrl",
@@ -125,20 +118,42 @@ def generate_launch_description():
             ("/robot/left/joint_state", "/puppet/joint_left"),
         ],
     )
-    # --- Create the Launch Description ---
-    # The launch description is a container for all the actions to be executed.
+
+    right_controller_node = Node(
+        package="robo_orchard_piper_ros2",
+        executable="single_ctrl",
+        name="robot_right_controller",
+        namespace="/robot/right",
+        output="screen",
+        emulate_tty=True,
+        parameters=[
+            {
+                "can_port": LaunchConfiguration("right_slave_can_port"),
+                "auto_enable_arm_ctrl": True,
+                "gripper_exist": True,
+                "enable_mit_ctrl": LaunchConfiguration(
+                    "enable_mit_control_mode"
+                ),
+            }
+        ],
+        remappings=[
+            ("/robot/right/status", "/puppet/status_right"),
+            ("/robot/right/ee_pose", "/puppet/end_pose_right"),
+            ("/robot/right/joint_state", "/puppet/joint_right"),
+        ],
+    )
+
     return LaunchDescription(
         [
-            # Add the declared arguments
             left_algo_topic_arg,
-            left_master_can_port_arg,
+            right_algo_topic_arg,
             left_slave_can_port_arg,
+            right_slave_can_port_arg,
             enable_mit_control_mode_arg,
-            enable_master_mit_control_mode_arg,
             replay_time_s_arg,
-            # Add the nodes to be launched
             left_takeover_muxer_node,
-            left_master_controller_node,
+            right_takeover_muxer_node,
             left_controller_node,
+            right_controller_node,
         ]
     )

@@ -14,6 +14,13 @@
 # implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+"""PC-side (master arm only) launch for distributed teleop.
+
+This launches only the master arm controller and the takeover muxer.
+The slave arm controller runs on the robot dog (S100).
+Communication between PC and robot dog is via ROS2 DDS over network.
+"""
+
 from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument
 from launch.substitutions import LaunchConfiguration
@@ -21,7 +28,8 @@ from launch_ros.actions import Node
 
 
 def generate_launch_description():
-    """Launch the complete human takeover system, including the muxer and the hardware controller."""  # noqa: E501
+    """Launch the master arm controller and takeover muxer on PC side."""
+
     # --- Declare Launch Arguments ---
     left_algo_topic_arg = DeclareLaunchArgument(
         "left_algo_topic",
@@ -33,17 +41,7 @@ def generate_launch_description():
         default_value="can_left_mst",
         description="CAN port for the left master arm.",
     )
-    left_slave_can_port_arg = DeclareLaunchArgument(
-        "left_slave_can_port",
-        default_value="can_left",
-        description="CAN port for the left slave arm.",
-    )
 
-    enable_mit_control_mode_arg = DeclareLaunchArgument(
-        "enable_mit_control_mode",
-        default_value="true",
-        description="Whether enable mit control mode or not.",
-    )
     enable_master_mit_control_mode_arg = DeclareLaunchArgument(
         "enable_master_mit_control_mode",
         default_value="true",
@@ -65,7 +63,7 @@ def generate_launch_description():
         name="robot_left_takeover_muxer",
         namespace="/robot/left/takeover_muxer",
         output="screen",
-        emulate_tty=True,  # Ensures logs are displayed properly
+        emulate_tty=True,
         parameters=[
             {
                 "message_type": "sensor_msgs/msg/JointState",
@@ -77,7 +75,8 @@ def generate_launch_description():
             }
         ],
     )
-    # 2. Piper Hardware Controller Node
+
+    # 2. Master Arm Controller Node (reads master arm, publishes joint state)
     left_master_controller_node = Node(
         package="robo_orchard_piper_ros2",
         executable="single_ctrl",
@@ -102,43 +101,15 @@ def generate_launch_description():
             ("/robot/left_master/joint_state", "/master/joint_left"),
         ],
     )
-    left_controller_node = Node(
-        package="robo_orchard_piper_ros2",
-        executable="single_ctrl",
-        name="robot_left_controller",
-        namespace="/robot/left",
-        output="screen",
-        emulate_tty=True,
-        parameters=[
-            {
-                "can_port": LaunchConfiguration("left_slave_can_port"),
-                "auto_enable_arm_ctrl": True,
-                "gripper_exist": True,
-                "enable_mit_ctrl": LaunchConfiguration(
-                    "enable_mit_control_mode"
-                ),
-            }
-        ],
-        remappings=[
-            ("/robot/left/status", "/puppet/status_left"),
-            ("/robot/left/ee_pose", "/puppet/end_pose_left"),
-            ("/robot/left/joint_state", "/puppet/joint_left"),
-        ],
-    )
+
     # --- Create the Launch Description ---
-    # The launch description is a container for all the actions to be executed.
     return LaunchDescription(
         [
-            # Add the declared arguments
             left_algo_topic_arg,
             left_master_can_port_arg,
-            left_slave_can_port_arg,
-            enable_mit_control_mode_arg,
             enable_master_mit_control_mode_arg,
             replay_time_s_arg,
-            # Add the nodes to be launched
             left_takeover_muxer_node,
             left_master_controller_node,
-            left_controller_node,
         ]
     )

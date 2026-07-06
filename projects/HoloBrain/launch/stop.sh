@@ -1,7 +1,7 @@
 set -e
 
-SESSION_NAME="holobrain"
-DOCKER_CONTAINER_NAME="holobrain"
+SESSION_NAME="holobrain-copy"
+DOCKER_CONTAINER_NAME="holobrain-copy"
 
 if [ "$(docker ps -aq -f name=^/${DOCKER_CONTAINER_NAME}$)" ]; then
     echo "Try to stoping container..."

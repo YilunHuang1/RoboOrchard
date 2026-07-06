@@ -45,6 +45,7 @@ def _install_stub_modules():
             self.service_type = service_type
 
         def call(self, request, timeout=5.0):
+            self.client.service_calls.append(self.name)
             return self.client.service_results[self.name]
 
     class FakeServiceRequest(dict):
@@ -90,6 +91,7 @@ class FakeTopic:
 class FakeRosClient:
     def __init__(self, services):
         self.is_connected = True
+        self.service_calls = []
         self.service_results = {
             service: {"success": True, "message": "ok"} for service in services
         }
@@ -135,6 +137,12 @@ def _build_helper(monkeypatch):
             "/robot/left_master/enable_ctrl",
             "/robot/right_master/enable_ctrl",
         ],
+        reset_arm_service_name=[
+            "/robot/left_master/reset_ctrl",
+            "/robot/left/reset_ctrl",
+            "/robot/right_master/reset_ctrl",
+            "/robot/right/reset_ctrl",
+        ],
         disable_inference_service_name=["/robot/inference_service/disable"],
         master_status_topics={
             "left": "/master/status_left",
@@ -150,6 +158,7 @@ def _build_helper(monkeypatch):
         + cfg.release_service_name
         + cfg.stop_service_name
         + cfg.enable_arm_service_name
+        + cfg.reset_arm_service_name
         + cfg.disable_inference_service_name
     )
     helper = RosServiceHelper(
@@ -281,4 +290,20 @@ def test_disable_inference_can_ignore_missing_service(monkeypatch):
 
     assert helper.disable_inference(allow_missing_service=True) is True
     assert helper.state.is_inference_service_running is False
+    assert helper.logger.errors == []
+
+
+def test_reset_arm_skips_missing_reset_services(monkeypatch):
+    FakeTopic.instances.clear()
+    helper = _build_helper(monkeypatch)
+    helper.ros_client.service_results = {
+        "/robot/left/reset_ctrl": {"success": True, "message": "ok"},
+        "/robot/right/reset_ctrl": {"success": True, "message": "ok"},
+    }
+
+    assert helper.reset_arm() is True
+    assert helper.ros_client.service_calls == [
+        "/robot/left/reset_ctrl",
+        "/robot/right/reset_ctrl",
+    ]
     assert helper.logger.errors == []

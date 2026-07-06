@@ -4,24 +4,19 @@ SCRIPT_REAL_PATH=$(readlink -f "${BASH_SOURCE[0]}")
 SCRIPT_DIR=$(dirname "$SCRIPT_REAL_PATH")
 
 # Use environment variables for quick overrides, e.g.:
-# CAMERA_NAME=middle_camera END_EFFECTOR_POSE_TOPIC=/master/end_pose_left bash launch_handeye_calib.sh
+# CAMERA_INFO_TOPIC=/agilex/left_camera/color/camera_info bash launch_handeye_calib.sh
 MODE="${MODE:-eye_in_hand}"
 ARUCO_MARKER_SIZE="${ARUCO_MARKER_SIZE:-0.1}"
-ARUCO_MARKER_ID="${ARUCO_MARKER_ID:-571}"
-CAMERA_NAMESPACE="${CAMERA_NAMESPACE:-agilex}"
-CAMERA_NAME="${CAMERA_NAME:-left_camera}"
-CAMERA_FRAME_NAME="${CAMERA_FRAME_NAME:-${CAMERA_NAME}_color_optical_frame}"
+ARUCO_MARKER_ID="${ARUCO_MARKER_ID:-100}"
+CAMERA_FRAME_NAME="${CAMERA_FRAME_NAME:-left_camera_color_optical_frame}"
 ARUCO_MARKER_FRAME_NAME="${ARUCO_MARKER_FRAME_NAME:-marker_frame}"
-CAMERA_INFO_TOPIC="${CAMERA_INFO_TOPIC:-/${CAMERA_NAMESPACE}/${CAMERA_NAME}/color/camera_info}"
-CAMERA_RAW_TOPIC="${CAMERA_RAW_TOPIC:-/${CAMERA_NAMESPACE}/${CAMERA_NAME}/color/image_rect_raw}"
+CAMERA_INFO_TOPIC="${CAMERA_INFO_TOPIC:-/agilex/left_camera/color/camera_info}"
+CAMERA_RAW_TOPIC="${CAMERA_RAW_TOPIC:-/agilex/left_camera/color/image_raw}"
 END_EFFECTOR_FRAME_NAME="${END_EFFECTOR_FRAME_NAME:-link6}"
 BASE_FRAME_NAME="${BASE_FRAME_NAME:-base_link}"
 END_EFFECTOR_POSE_TOPIC="${END_EFFECTOR_POSE_TOPIC:-/master/end_pose_left}"
-RESULT_FILE="${RESULT_FILE:-$SCRIPT_DIR/${CAMERA_NAME}_handeye_result.json}"
+RESULT_FILE="${RESULT_FILE:-$SCRIPT_DIR/handeye_result.json}"
 
-echo "Using CAMERA_NAMESPACE=$CAMERA_NAMESPACE"
-echo "Using CAMERA_NAME=$CAMERA_NAME"
-echo "Using CAMERA_FRAME_NAME=$CAMERA_FRAME_NAME"
 echo "Using CAMERA_INFO_TOPIC=$CAMERA_INFO_TOPIC"
 echo "Using CAMERA_RAW_TOPIC=$CAMERA_RAW_TOPIC"
 echo "Using END_EFFECTOR_POSE_TOPIC=$END_EFFECTOR_POSE_TOPIC"

@@ -1,3 +1,6 @@
+# Distributed teleop launch config (PC side only).
+# The slave arm runs on the robot dog (S100) separately.
+# Based on launch.yaml but uses dagger_master.sh instead of dagger.sh.
 session_name: holobrain
 options:
   mouse: on
@@ -5,23 +8,14 @@ options:
 
 environment:
   DOCKER_NAME: holobrain
-  DOCKER_VENV_PATH: /home/users/$USER/venv/robot-venv
-  DOCKER_ROBO_ORCHARD_PATH: /home/users/$USER/code/RoboOrchard
-  # camera serial number.
-  LEFT_WRIST_CAMERA_SERIAL_NO: "260322274060"
-  RIGHT_WRIST_CAMERA_SERIAL_NO: "352122272160"
-  ENV_CENTER_CAMERA_SERIAL_NO: "254922306787"
-  REALSENSE_D405_PROFILE_ARGS: "depth_module.color_profile:=640x480x15 depth_module.depth_profile:=640x480x15"
-  REALSENSE_D455_PROFILE_ARGS: "rgb_camera.color_profile:=640x480x15 depth_module.depth_profile:=640x480x15"
+  DOCKER_VENV_PATH: /home/users/$USER/docker_env/venv/robot-venv
+  DOCKER_ROBO_ORCHARD_PATH: /home/users/$USER/RoboOrchard
 
 shell_command_before:
   - docker exec -it
     -e TERM=xterm-256color
     -e DOCKER_VENV_PATH="$DOCKER_VENV_PATH"
     -e DOCKER_ROBO_ORCHARD_PATH="$DOCKER_ROBO_ORCHARD_PATH"
-    -e LEFT_WRIST_CAMERA_SERIAL_NO="$LEFT_WRIST_CAMERA_SERIAL_NO"
-    -e RIGHT_WRIST_CAMERA_SERIAL_NO="$RIGHT_WRIST_CAMERA_SERIAL_NO"
-    -e ENV_CENTER_CAMERA_SERIAL_NO="$ENV_CENTER_CAMERA_SERIAL_NO"
     $DOCKER_NAME /bin/bash
   - source $DOCKER_VENV_PATH/bin/activate && source $DOCKER_ROBO_ORCHARD_PATH/ros2_package/install/setup.bash
   - git config --global --add safe.directory $DOCKER_ROBO_ORCHARD_PATH
@@ -39,26 +33,6 @@ windows:
         - eval "$CMD"
       - shell_command:  # ros bridge server
         - CMD="ros2 launch rosbridge_server rosbridge_websocket_launch.xml"
-        - history -s "$CMD"
-        - eval "$CMD"
-
-  - window_name: camera service
-    layout: tiled
-    panes:
-      - shell_command:  # left wrist cameras
-        - CMD="ros2 launch realsense2_camera rs_launch.py camera_namespace:='agilex' camera_name:='left_camera' align_depth.enable:=true initial_reset:=true diagnostics_period:=2.0 serial_no:=\"'$LEFT_WRIST_CAMERA_SERIAL_NO'\" $REALSENSE_D405_PROFILE_ARGS"
-        - history -s "$CMD"
-        - eval "$CMD"
-      - shell_command:  # right wrist cameras
-        - echo "Waiting 8s for left camera before starting right..."
-        - sleep 8
-        - CMD="ros2 launch realsense2_camera rs_launch.py camera_namespace:='agilex' camera_name:='right_camera' align_depth.enable:=true initial_reset:=true diagnostics_period:=2.0 serial_no:=\"'$RIGHT_WRIST_CAMERA_SERIAL_NO'\" $REALSENSE_D405_PROFILE_ARGS"
-        - history -s "$CMD"
-        - eval "$CMD"
-      - shell_command:  # env center cameras
-        - echo "Waiting 15s for left/right cameras before starting middle..."
-        - sleep 15
-        - CMD="ros2 launch realsense2_camera rs_launch.py camera_namespace:='agilex' camera_name:='middle_camera' align_depth.enable:=true initial_reset:=true diagnostics_period:=2.0 serial_no:=\"'$ENV_CENTER_CAMERA_SERIAL_NO'\" $REALSENSE_D455_PROFILE_ARGS"
         - history -s "$CMD"
         - eval "$CMD"
 
@@ -89,8 +63,8 @@ windows:
     shell_command_before:
       - cd $DOCKER_ROBO_ORCHARD_PATH/projects/HoloBrain
     panes:
-      - shell_command:  # piper dagger
-        - CMD="bash teleop/rename-can.sh && bash teleop/dagger.sh"
+      - shell_command:  # piper dagger (master only, slave is on robot dog)
+        - CMD="bash teleop/rename-can.sh && bash teleop/dagger_master.sh"
         - history -s "$CMD"
         - eval "$CMD"
 

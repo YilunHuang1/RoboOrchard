@@ -26,6 +26,8 @@ from robo_orchard_deploy_ros2.config import (
 
 def main():
     camera_prefix = "/agilex"
+    left_color_topic = f"{camera_prefix}/left_camera/color/image_rect_raw"
+    right_color_topic = f"{camera_prefix}/right_camera/color/image_rect_raw"
     config = DeployConfig(
         robot_config=RobotConfig(
             num_joints=7,
@@ -43,8 +45,9 @@ def main():
         ),
         observation_config=ObservationConfig(
             color_topics={
-                "left_color": f"{camera_prefix}/left_camera/color/image_raw",
-                "right_color": f"{camera_prefix}/right_camera/color/image_raw",
+                # D405 wrist cameras publish color to image_rect_raw.
+                "left_color": left_color_topic,
+                "right_color": right_color_topic,
                 "middle_color": f"{camera_prefix}/middle_camera/color/image_raw",  # noqa E501
             },
             depth_topics={

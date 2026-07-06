@@ -260,8 +260,21 @@ class RosServiceHelper:
 
     def reset_arm(self) -> bool:
         """Sends a request to reset the robot arm controllers to zero."""
+        if not self._check_client_connected():
+            return False
+
+        available_services: list[str] = self.ros_client.get_services()
+        reset_service_names = [
+            service_name
+            for service_name in self.cfg.reset_arm_service_name
+            if service_name in available_services
+        ]
+        if not reset_service_names:
+            self.logger.error("No reset arm services are available!")
+            return False
+
         return self._call_services(
-            service_names=self.cfg.reset_arm_service_name,
+            service_names=reset_service_names,
             success_msg="Robot arm controllers reset successfully!",
         )
 
