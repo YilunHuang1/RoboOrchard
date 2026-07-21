@@ -62,15 +62,17 @@ from arm_bridge import (
 # Generated Aorta schema-meta modules (from aorta repo arm .fbs). Each bundles
 # the FlatBuffers accessors/builders + SCHEMA_BFBS/hash (like demo_chat_schema_meta).
 import arm_joint_state_schema_meta as JS   # ArmJointState  (joint_state + joint_cmd)
-import arm_ee_pose_schema_meta as EE       # ArmEePose (+ CreateVec3 / CreateQuat)
+import arm_ee_pose_schema_meta as EE       # ArmEePose
 import piper_status_schema_meta as ST      # PiperStatus
 import arm_trigger_schema_meta as TRIG     # ArmTriggerRequest / ArmTriggerResponse
 
-# NOTE: EE.CreateVec3 / EE.CreateQuat are the generated struct creators for the
-# Vec3 / Quat structs in arm_ee_pose.fbs. If the aorta `aorta_fbs_library`
-# schema-meta bundle does NOT re-export them, import them from the generated
-# flatbuffers modules instead (e.g. `from arm.Vec3 import CreateVec3`). Verified
-# against flatc output in docs/aorta-migration/reference-impl/validate_fill.py.
+# Struct creators for the Vec3 / Quat structs in arm_ee_pose.fbs. CONFIRMED
+# (against the aorta bazel-built bindings) that the *_schema_meta module's
+# `from arm.ArmEePose import *` does NOT re-export these — they live in their own
+# generated modules — so import them explicitly. (namespace `arm` = the .fbs
+# namespace; provided by arm_ee_pose_py_lib.)
+from arm.Vec3 import CreateVec3
+from arm.Quat import CreateQuat
 
 # aorta.services.common.ServiceStatus enum values (see status.fbs)
 SVC_SUCCESS = 0
@@ -248,9 +250,9 @@ class PiperSingleControlNode:
             EE.ArmEePoseStart(b)
             EE.ArmEePoseAddAortaHeader(b, header_off)
             EE.ArmEePoseAddStampNs(b, stamp)
-            EE.ArmEePoseAddPosition(b, EE.CreateVec3(b, pose.px, pose.py, pose.pz))
+            EE.ArmEePoseAddPosition(b, CreateVec3(b, pose.px, pose.py, pose.pz))
             EE.ArmEePoseAddOrientation(
-                b, EE.CreateQuat(b, pose.ox, pose.oy, pose.oz, pose.ow)
+                b, CreateQuat(b, pose.ox, pose.oy, pose.oz, pose.ow)
             )
             return EE.ArmEePoseEnd(b)
 
