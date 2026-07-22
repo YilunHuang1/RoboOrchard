@@ -14,6 +14,8 @@
 # implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+# ruff: noqa: E501, N812
+
 """Aorta-only keyboard takeover trigger (migration PR-B draft).
 
 Direct rewrite of ``robo_orchard_teleop_ros2/take_over/trigger/keyboard.py``.
@@ -28,7 +30,6 @@ Needs libaorta_core + the generated ``arm_trigger_schema_meta`` module.
 """
 
 from __future__ import annotations
-
 import argparse
 import json
 import logging
@@ -37,6 +38,7 @@ import threading
 
 import aorta
 import arm_trigger_schema_meta as TRIG  # ArmTriggerRequest / ArmTriggerResponse
+from aorta.services.arm.ArmTriggerResponse import ArmTriggerResponse
 
 log = logging.getLogger("multi_keyboard_trigger_node")
 
@@ -77,12 +79,14 @@ class KeyboardTriggerNode:
 
         log.info("Configuring multi-keyboard trigger...")
         for key, service_list in self._key_service_map.items():
-            log.info("- Type `%s` and press Enter ==> Calls %s", key, service_list)
+            log.info(
+                "- Type `%s` and press Enter ==> Calls %s", key, service_list
+            )
             for service_name in service_list:
                 if service_name not in self._clients:
                     self._clients[service_name] = node.create_client_typed(
                         service_name,
-                        TRIG.ArmTriggerResponse.GetRootAs,
+                        ArmTriggerResponse.GetRootAs,
                         request_schema_meta=TRIG,
                     )
 
@@ -98,7 +102,9 @@ class KeyboardTriggerNode:
         log.info("Keyboard listener started. Ready for triggers.")
 
     def _keyboard_listener_loop(self):
-        listen_keyboard(on_press=self._on_key_press, delay_second_char=0.05, lower=False)
+        listen_keyboard(
+            on_press=self._on_key_press, delay_second_char=0.05, lower=False
+        )
 
     def _on_key_press(self, key: str):
         with self._lock:
@@ -106,7 +112,9 @@ class KeyboardTriggerNode:
                 if self._input_buffer in self._key_service_map:
                     self._trigger_services_for_key(self._input_buffer)
                 else:
-                    log.warning("No action defined for input: '%s'", self._input_buffer)
+                    log.warning(
+                        "No action defined for input: '%s'", self._input_buffer
+                    )
                 self._input_buffer = ""
             elif key == "backspace":
                 self._input_buffer = self._input_buffer[:-1]
@@ -115,20 +123,30 @@ class KeyboardTriggerNode:
             print(
                 f"Input: {Colors.BOLD}{Colors.CYAN}{self._input_buffer}"
                 f"{Colors.RESET}{Colors.CLEAR_LINE}",
-                end="\r", flush=True,
+                end="\r",
+                flush=True,
             )
 
     def _trigger_services_for_key(self, key: str):
         service_names = self._key_service_map.get(key, [])
-        log.info("Key binding `%s` matched. Calling %d service(s).", key, len(service_names))
+        log.info(
+            "Key binding `%s` matched. Calling %d service(s).",
+            key,
+            len(service_names),
+        )
         for service_name in service_names:
             client = self._clients.get(service_name)
-            if client is None or not client.matching_status():
-                log.warning("Service `%s` is not available. Trigger ignored.", service_name)
+            if client is None or not client.raw().matching_status():
+                log.warning(
+                    "Service `%s` is not available. Trigger ignored.",
+                    service_name,
+                )
                 continue
             # Aorta call() is blocking; run each on a worker so the listener stays live.
             threading.Thread(
-                target=self._call_service, args=(client, service_name), daemon=True
+                target=self._call_service,
+                args=(client, service_name),
+                daemon=True,
             ).start()
 
     def _call_service(self, client, service_name: str):
@@ -157,7 +175,8 @@ def _parse_args(argv=None) -> argparse.Namespace:
     p = argparse.ArgumentParser(description="Aorta keyboard takeover trigger")
     p.add_argument("--node-name", default="multi_keyboard_trigger_node")
     p.add_argument(
-        "--config", required=True,
+        "--config",
+        required=True,
         help="JSON file: {key: [aorta_service_name, ...]}",
     )
     return p.parse_args(argv)

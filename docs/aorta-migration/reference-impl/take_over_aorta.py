@@ -14,6 +14,8 @@
 # implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+# ruff: noqa: E501, N812
+
 """Aorta-only takeover muxer (migration PR-B draft).
 
 Direct rewrite of ``robo_orchard_teleop_ros2/take_over/node.py`` onto the Aorta
@@ -40,7 +42,6 @@ Needs libaorta_core + the generated ``*_schema_meta`` modules (see README).
 """
 
 from __future__ import annotations
-
 import argparse
 import collections
 import logging
@@ -51,10 +52,17 @@ from enum import Enum
 import aorta
 
 # Generated Aorta schema-meta modules (from aorta repo arm .fbs).
-import arm_joint_state_schema_meta as JS   # ArmJointState (output topic schema)
-import control_mode_schema_meta as CM      # ControlMode
-import takeover_event_schema_meta as EV    # TakeOverEvent
-import arm_trigger_schema_meta as TRIG     # ArmTriggerRequest / ArmTriggerResponse
+import arm_joint_state_schema_meta as JS  # ArmJointState (output topic schema)
+import arm_trigger_schema_meta as TRIG  # ArmTriggerRequest / ArmTriggerResponse
+import control_mode_schema_meta as CM  # ControlMode
+import takeover_event_schema_meta as EV  # TakeOverEvent
+from aorta.services.arm.ArmTriggerResponse import (
+    ArmTriggerResponseAddAortaHeader,
+    ArmTriggerResponseAddMessage,
+    ArmTriggerResponseAddStatus,
+    ArmTriggerResponseEnd,
+    ArmTriggerResponseStart,
+)
 
 log = logging.getLogger("takeover_muxer_node")
 
@@ -91,7 +99,9 @@ class TakeOverMuxerNode:
         # --- internal state ---
         self._current_mode = ControlMode.AUTONOMOUS
         buffer_size = int(200 * (self._replay_time_s + 2.0))
-        self._history = collections.deque(maxlen=buffer_size)  # (recv_ns, payload)
+        self._history = collections.deque(
+            maxlen=buffer_size
+        )  # (recv_ns, payload)
 
         # Serialize every callback (inputs + services + timer) onto one thread.
         grp = node.create_execution_group(aorta.ExecutionPolicy.SERIALIZED)
@@ -113,9 +123,13 @@ class TakeOverMuxerNode:
         )
         # override subscriber: only when we actually forward override commands.
         if self._override_behavior == "forward":
-            log.info("Behavior `forward`: subscribing override topic %s", self._override_topic)
+            log.info(
+                "Behavior `forward`: subscribing override topic %s",
+                self._override_topic,
+            )
             node.create_subscriber(
-                self._override_topic, self._on_override,
+                self._override_topic,
+                self._on_override,
                 options=grp.subscriber_options(),
             )
         else:
@@ -128,14 +142,18 @@ class TakeOverMuxerNode:
             (args.stop_service, self._stop_service_callback),
         ):
             node.create_service_typed_view(
-                TRIG.ArmTriggerRequest.GetRootAs, name, cb,
-                request_schema_meta=TRIG, response_schema_meta=TRIG,
+                TRIG.ArmTriggerRequest.GetRootAs,
+                name,
+                cb,
+                request_schema_meta=TRIG,
+                response_schema_meta=TRIG,
                 options=grp.service_options(),
             )
 
         # Mode-publish timer.
         node.create_timer(
-            1.0 / args.mode_publish_rate_hz, self._publish_current_mode,
+            1.0 / args.mode_publish_rate_hz,
+            self._publish_current_mode,
             options=grp.timer_options(),
         )
         log.info(
@@ -171,14 +189,19 @@ class TakeOverMuxerNode:
         if self._replay_time_s <= 0.0:
             log.info("Takeover successful, but without any replay.")
             self._publish_current_mode()
-            self._reply(responder, True, "Takeover successful, but without any replay.")
+            self._reply(
+                responder, True, "Takeover successful, but without any replay."
+            )
             return
 
         if not self._history:
-            log.warning("Takeover successful, but cannot replay: history buffer is empty.")
+            log.warning(
+                "Takeover successful, but cannot replay: history buffer is empty."
+            )
             self._publish_current_mode()
             self._reply(
-                responder, True,
+                responder,
+                True,
                 "Takeover successful, but cannot replay: history buffer is empty.",
             )
             return
@@ -208,7 +231,9 @@ class TakeOverMuxerNode:
         if self._current_mode == ControlMode.AUTONOMOUS:
             self._reply(responder, True, "Already in AUTONOMOUS mode.")
             return
-        self._publish_event(EV_RELEASE_TRIGGERED, "Release control service called.")
+        self._publish_event(
+            EV_RELEASE_TRIGGERED, "Release control service called."
+        )
         log.info("Control released. Switching back to AUTONOMOUS mode.")
         self._current_mode = ControlMode.AUTONOMOUS
         self._history.clear()
@@ -224,7 +249,9 @@ class TakeOverMuxerNode:
         self._publish_event(EV_STOP_TRIGGERED, "Stop service called.")
         self._publish_current_mode()
         # NOTE: preserves original behavior — no zero-command is actually sent.
-        self._reply(responder, True, "Switched to STOP mode and sent a zero-command.")
+        self._reply(
+            responder, True, "Switched to STOP mode and sent a zero-command."
+        )
 
     # ── typed publishers / reply ─────────────────────────────────────────────
     def _publish_current_mode(self) -> None:
@@ -262,11 +289,11 @@ class TakeOverMuxerNode:
 
         def fill(b, header_off):
             msg_off = b.CreateString(message)
-            TRIG.ArmTriggerResponseStart(b)
-            TRIG.ArmTriggerResponseAddAortaHeader(b, header_off)
-            TRIG.ArmTriggerResponseAddStatus(b, status)
-            TRIG.ArmTriggerResponseAddMessage(b, msg_off)
-            return TRIG.ArmTriggerResponseEnd(b)
+            ArmTriggerResponseStart(b)
+            ArmTriggerResponseAddAortaHeader(b, header_off)
+            ArmTriggerResponseAddStatus(b, status)
+            ArmTriggerResponseAddMessage(b, msg_off)
+            return ArmTriggerResponseEnd(b)
 
         responder.reply(fill)
 
@@ -277,14 +304,31 @@ def _parse_args(argv=None) -> argparse.Namespace:
     p.add_argument("--algo-topic", default="aorta/left_algo_cmd")
     p.add_argument("--override-topic", default="aorta/master/joint_left")
     p.add_argument("--output-topic", default="aorta/robot/left/joint_cmd")
-    p.add_argument("--control-mode-topic", default="aorta/robot/left/takeover_muxer/control_mode")
-    p.add_argument("--events-topic", default="aorta/robot/left/takeover_muxer/events")
-    p.add_argument("--takeover-service", default="aorta/robot/left/takeover_muxer/trigger_takeover")
-    p.add_argument("--release-service", default="aorta/robot/left/takeover_muxer/release_control")
-    p.add_argument("--stop-service", default="aorta/robot/left/takeover_muxer/stop")
+    p.add_argument(
+        "--control-mode-topic",
+        default="aorta/robot/left/takeover_muxer/control_mode",
+    )
+    p.add_argument(
+        "--events-topic", default="aorta/robot/left/takeover_muxer/events"
+    )
+    p.add_argument(
+        "--takeover-service",
+        default="aorta/robot/left/takeover_muxer/trigger_takeover",
+    )
+    p.add_argument(
+        "--release-service",
+        default="aorta/robot/left/takeover_muxer/release_control",
+    )
+    p.add_argument(
+        "--stop-service", default="aorta/robot/left/takeover_muxer/stop"
+    )
     p.add_argument("--replay-time-s", type=float, default=2.0)
     p.add_argument("--mode-publish-rate-hz", type=float, default=1.0)
-    p.add_argument("--override-mode-behavior", default="forward", choices=["forward", "silent"])
+    p.add_argument(
+        "--override-mode-behavior",
+        default="forward",
+        choices=["forward", "silent"],
+    )
     return p.parse_args(argv)
 
 

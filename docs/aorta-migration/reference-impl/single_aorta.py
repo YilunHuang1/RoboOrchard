@@ -14,6 +14,8 @@
 # implied. See the License for the specific language governing
 # permissions and limitations under the License.
 
+# ruff: noqa: E501, N812
+
 """Aorta-only Piper single-arm controller (migration PR-B draft).
 
 Direct rewrite of ``robo_orchard_piper_ros2/single.py`` onto the Aorta Python
@@ -37,7 +39,6 @@ Aorta runtime; it is the reviewable code for PR-B.
 """
 
 from __future__ import annotations
-
 import argparse
 import logging
 import os
@@ -46,7 +47,28 @@ import threading
 import time
 
 import aorta
+import arm_ee_pose_schema_meta as EE  # ArmEePose
 
+# Generated Aorta schema-meta modules (from aorta repo arm .fbs). Each bundles
+# the FlatBuffers accessors/builders + SCHEMA_BFBS/hash (like demo_chat_schema_meta).
+import arm_joint_state_schema_meta as JS  # ArmJointState  (joint_state + joint_cmd)
+import arm_trigger_schema_meta as TRIG  # ArmTriggerRequest / ArmTriggerResponse
+import piper_status_schema_meta as ST  # PiperStatus
+from aorta.services.arm.ArmTriggerResponse import (
+    ArmTriggerResponseAddAortaHeader,
+    ArmTriggerResponseAddMessage,
+    ArmTriggerResponseAddStatus,
+    ArmTriggerResponseEnd,
+    ArmTriggerResponseStart,
+)
+from arm.Quat import CreateQuat
+
+# Struct creators for the Vec3 / Quat structs in arm_ee_pose.fbs. CONFIRMED
+# (against the aorta bazel-built bindings) that the *_schema_meta module's
+# `from arm.ArmEePose import *` does NOT re-export these — they live in their own
+# generated modules — so import them explicitly. (namespace `arm` = the .fbs
+# namespace; provided by arm_ee_pose_py_lib.)
+from arm.Vec3 import CreateVec3
 from arm_bridge import (
     JointStateData,
     create_piper,
@@ -58,21 +80,6 @@ from arm_bridge import (
     set_ctrl_method,
     switch_piper_ctrl_mode,
 )
-
-# Generated Aorta schema-meta modules (from aorta repo arm .fbs). Each bundles
-# the FlatBuffers accessors/builders + SCHEMA_BFBS/hash (like demo_chat_schema_meta).
-import arm_joint_state_schema_meta as JS   # ArmJointState  (joint_state + joint_cmd)
-import arm_ee_pose_schema_meta as EE       # ArmEePose
-import piper_status_schema_meta as ST      # PiperStatus
-import arm_trigger_schema_meta as TRIG     # ArmTriggerRequest / ArmTriggerResponse
-
-# Struct creators for the Vec3 / Quat structs in arm_ee_pose.fbs. CONFIRMED
-# (against the aorta bazel-built bindings) that the *_schema_meta module's
-# `from arm.ArmEePose import *` does NOT re-export these — they live in their own
-# generated modules — so import them explicitly. (namespace `arm` = the .fbs
-# namespace; provided by arm_ee_pose_py_lib.)
-from arm.Vec3 import CreateVec3
-from arm.Quat import CreateQuat
 
 # aorta.services.common.ServiceStatus enum values (see status.fbs)
 SVC_SUCCESS = 0
@@ -87,15 +94,20 @@ class PiperSingleControlNode:
         self.node = node
         self.can_port = args.can_port
         self.gripper_exist = args.gripper_exist
-        self.gripper_val_mutiple = max(0, min(int(args.gripper_val_mutiple), 10))
+        self.gripper_val_mutiple = max(
+            0, min(int(args.gripper_val_mutiple), 10)
+        )
         self.auto_enable_arm_ctrl = args.auto_enable_arm_ctrl
         self.enable_mit_ctrl = args.enable_mit_ctrl
 
         log.info(
             "can_port=%s auto_enable_arm_ctrl=%s gripper_exist=%s "
             "gripper_val_mutiple=%s enable_mit_ctrl=%s",
-            self.can_port, self.auto_enable_arm_ctrl, self.gripper_exist,
-            self.gripper_val_mutiple, self.enable_mit_ctrl,
+            self.can_port,
+            self.auto_enable_arm_ctrl,
+            self.gripper_exist,
+            self.gripper_val_mutiple,
+            self.enable_mit_ctrl,
         )
 
         self.piper = create_piper(self.can_port)
@@ -125,15 +137,19 @@ class PiperSingleControlNode:
 
         # Services (typed, Trigger-shaped), serialized with the timer.
         node.create_service_typed_view(
-            TRIG.ArmTriggerRequest.GetRootAs, args.enable_service,
+            TRIG.ArmTriggerRequest.GetRootAs,
+            args.enable_service,
             self._enable_ctrl_service_callback,
-            request_schema_meta=TRIG, response_schema_meta=TRIG,
+            request_schema_meta=TRIG,
+            response_schema_meta=TRIG,
             options=grp.service_options(),
         )
         node.create_service_typed_view(
-            TRIG.ArmTriggerRequest.GetRootAs, args.reset_service,
+            TRIG.ArmTriggerRequest.GetRootAs,
+            args.reset_service,
             self._reset_ctrl_service_callback,
-            request_schema_meta=TRIG, response_schema_meta=TRIG,
+            request_schema_meta=TRIG,
+            response_schema_meta=TRIG,
             options=grp.service_options(),
         )
 
@@ -159,7 +175,9 @@ class PiperSingleControlNode:
         if ctrl_mode == 0x02:
             if arm_status.teach_status == 1:
                 return False
-            log.warning("ctrl_mode is %s, switch directly to ctrl mode...", ctrl_mode)
+            log.warning(
+                "ctrl_mode is %s, switch directly to ctrl mode...", ctrl_mode
+            )
             switch_piper_ctrl_mode(self.piper, 0x01)
         else:
             enable_arm_ctrl(self.piper)
@@ -184,7 +202,8 @@ class PiperSingleControlNode:
         if latest is not None and self.is_controlable():
             cmd = self._decode_joint_cmd(latest.payload)
             joint_control(
-                self.piper, joint_data=cmd,
+                self.piper,
+                joint_data=cmd,
                 has_gripper=self.gripper_exist,
                 gripper_val_mutiple=self.gripper_val_mutiple,
             )
@@ -250,7 +269,9 @@ class PiperSingleControlNode:
             EE.ArmEePoseStart(b)
             EE.ArmEePoseAddAortaHeader(b, header_off)
             EE.ArmEePoseAddStampNs(b, stamp)
-            EE.ArmEePoseAddPosition(b, CreateVec3(b, pose.px, pose.py, pose.pz))
+            EE.ArmEePoseAddPosition(
+                b, CreateVec3(b, pose.px, pose.py, pose.pz)
+            )
             EE.ArmEePoseAddOrientation(
                 b, CreateQuat(b, pose.ox, pose.oy, pose.oz, pose.ow)
             )
@@ -276,12 +297,24 @@ class PiperSingleControlNode:
             ST.PiperStatusAddJoint4AngleLimit(b, s.joint_4_angle_limit)
             ST.PiperStatusAddJoint5AngleLimit(b, s.joint_5_angle_limit)
             ST.PiperStatusAddJoint6AngleLimit(b, s.joint_6_angle_limit)
-            ST.PiperStatusAddCommunicationStatusJoint1(b, s.communication_status_joint_1)
-            ST.PiperStatusAddCommunicationStatusJoint2(b, s.communication_status_joint_2)
-            ST.PiperStatusAddCommunicationStatusJoint3(b, s.communication_status_joint_3)
-            ST.PiperStatusAddCommunicationStatusJoint4(b, s.communication_status_joint_4)
-            ST.PiperStatusAddCommunicationStatusJoint5(b, s.communication_status_joint_5)
-            ST.PiperStatusAddCommunicationStatusJoint6(b, s.communication_status_joint_6)
+            ST.PiperStatusAddCommunicationStatusJoint1(
+                b, s.communication_status_joint_1
+            )
+            ST.PiperStatusAddCommunicationStatusJoint2(
+                b, s.communication_status_joint_2
+            )
+            ST.PiperStatusAddCommunicationStatusJoint3(
+                b, s.communication_status_joint_3
+            )
+            ST.PiperStatusAddCommunicationStatusJoint4(
+                b, s.communication_status_joint_4
+            )
+            ST.PiperStatusAddCommunicationStatusJoint5(
+                b, s.communication_status_joint_5
+            )
+            ST.PiperStatusAddCommunicationStatusJoint6(
+                b, s.communication_status_joint_6
+            )
             return ST.PiperStatusEnd(b)
 
         return fill
@@ -291,11 +324,11 @@ class PiperSingleControlNode:
 
         def fill(b, header_off):
             msg_off = b.CreateString(message)
-            TRIG.ArmTriggerResponseStart(b)
-            TRIG.ArmTriggerResponseAddAortaHeader(b, header_off)
-            TRIG.ArmTriggerResponseAddStatus(b, status)
-            TRIG.ArmTriggerResponseAddMessage(b, msg_off)
-            return TRIG.ArmTriggerResponseEnd(b)
+            ArmTriggerResponseStart(b)
+            ArmTriggerResponseAddAortaHeader(b, header_off)
+            ArmTriggerResponseAddStatus(b, status)
+            ArmTriggerResponseAddMessage(b, msg_off)
+            return ArmTriggerResponseEnd(b)
 
         responder.reply(fill)
 
@@ -308,15 +341,20 @@ class PiperSingleControlNode:
             return
         try:
             if self.enable_arm_ctrl(force_reset=True):
-                self._reply_trigger(responder, True, "Arm enabled successfully.")
+                self._reply_trigger(
+                    responder, True, "Arm enabled successfully."
+                )
             else:
                 self._reply_trigger(
-                    responder, False,
+                    responder,
+                    False,
                     "Failed to enable arm. It might be in an unrecoverable state.",
                 )
         except Exception as e:  # noqa: BLE001
             log.error("Error while enabling arm: %s", e)
-            self._reply_trigger(responder, False, f"An unexpected error occurred: {e}")
+            self._reply_trigger(
+                responder, False, f"An unexpected error occurred: {e}"
+            )
 
     def _reset_ctrl_service_callback(self, request, responder) -> None:
         log.info("Received request to reset arm.")
@@ -341,8 +379,10 @@ class PiperSingleControlNode:
                 ]
                 traj.append(
                     JointStateData(
-                        name=cur.name, position=interp,
-                        velocity=cur.velocity, effort=cur.effort,
+                        name=cur.name,
+                        position=interp,
+                        velocity=cur.velocity,
+                        effort=cur.effort,
                     )
                 )
             return traj
@@ -350,7 +390,8 @@ class PiperSingleControlNode:
         try:
             for waypoint in _gen_reset_traj():
                 joint_control(
-                    self.piper, joint_data=waypoint,
+                    self.piper,
+                    joint_data=waypoint,
                     has_gripper=self.gripper_exist,
                     gripper_val_mutiple=self.gripper_val_mutiple,
                 )
@@ -358,18 +399,29 @@ class PiperSingleControlNode:
             self._reply_trigger(responder, True, "Arm reset successfully.")
         except Exception as e:  # noqa: BLE001
             log.error("Error while resetting arm: %s", e)
-            self._reply_trigger(responder, False, f"An unexpected error occurred: {e}")
+            self._reply_trigger(
+                responder, False, f"An unexpected error occurred: {e}"
+            )
 
 
 def _parse_args(argv=None) -> argparse.Namespace:
-    p = argparse.ArgumentParser(description="Aorta Piper single-arm controller")
+    p = argparse.ArgumentParser(
+        description="Aorta Piper single-arm controller"
+    )
     p.add_argument("--node-name", default="piper_single_ctrl")
     # control params (were ROS params)
-    p.add_argument("--can-port", default=os.environ.get("ROBO_ORCHARD_CAN_PORT", "can0"))
+    p.add_argument(
+        "--can-port", default=os.environ.get("ROBO_ORCHARD_CAN_PORT", "can0")
+    )
     p.add_argument("--gripper-exist", type=_boolish, default=True)
     p.add_argument("--gripper-val-mutiple", type=int, default=1)
-    p.add_argument("--auto-enable-arm-ctrl", type=_boolish,
-                   default=_boolish(os.environ.get("ROBO_ORCHARD_AUTO_ENABLE_ARM_CTRL", "false")))
+    p.add_argument(
+        "--auto-enable-arm-ctrl",
+        type=_boolish,
+        default=_boolish(
+            os.environ.get("ROBO_ORCHARD_AUTO_ENABLE_ARM_CTRL", "false")
+        ),
+    )
     p.add_argument("--enable-mit-ctrl", type=_boolish, default=False)
     # topic/service names (were launch remaps). slave defaults => /puppet/*.
     p.add_argument("--joint-state-topic", default="aorta/puppet/joint_left")
