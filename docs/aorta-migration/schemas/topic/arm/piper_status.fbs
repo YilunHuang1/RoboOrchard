@@ -1,0 +1,27 @@
+// Piper arm status — mirrors robo_orchard_piper_msg_ros2/PiperStatusMsg.
+include "schemas/system/aorta_base.fbs";
+namespace arm;
+
+table PiperStatus {
+  aorta_header:   aorta.sys.AortaHeader (id: 0);
+  ctrl_mode:      ubyte (id: 1);
+  arm_status:     ubyte (id: 2);
+  mode_feedback:  ubyte (id: 3);
+  teach_status:   ubyte (id: 4);
+  motion_status:  ubyte (id: 5);
+  trajectory_num: ubyte (id: 6);
+  err_code:       long  (id: 7);
+  joint_1_angle_limit: bool (id: 8);
+  joint_2_angle_limit: bool (id: 9);
+  joint_3_angle_limit: bool (id: 10);
+  joint_4_angle_limit: bool (id: 11);
+  joint_5_angle_limit: bool (id: 12);
+  joint_6_angle_limit: bool (id: 13);
+  communication_status_joint_1: bool (id: 14);
+  communication_status_joint_2: bool (id: 15);
+  communication_status_joint_3: bool (id: 16);
+  communication_status_joint_4: bool (id: 17);
+  communication_status_joint_5: bool (id: 18);
+  communication_status_joint_6: bool (id: 19);
+}
+root_type PiperStatus;

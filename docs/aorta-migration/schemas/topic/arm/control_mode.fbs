@@ -1,0 +1,9 @@
+// Takeover muxer current mode — mirrors robo_orchard_teleop_msg_ros2/ControlMode.
+include "schemas/system/aorta_base.fbs";
+namespace arm;
+table ControlMode {
+  aorta_header: aorta.sys.AortaHeader (id: 0);
+  stamp_ns:     ulong  (id: 1);
+  data:         string (id: 2);   // "AUTONOMOUS" | "OVERRIDE" | "STOP"
+}
+root_type ControlMode;

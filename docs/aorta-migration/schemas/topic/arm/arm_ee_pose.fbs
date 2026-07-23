@@ -1,0 +1,14 @@
+// End-effector pose — mirrors geometry_msgs/PoseStamped (FK output).
+include "schemas/system/aorta_base.fbs";
+namespace arm;
+
+struct Vec3 { x:double; y:double; z:double; }
+struct Quat { x:double; y:double; z:double; w:double; }
+
+table ArmEePose {
+  aorta_header: aorta.sys.AortaHeader (id: 0);
+  stamp_ns:     ulong (id: 1);
+  position:     Vec3  (id: 2);
+  orientation:  Quat  (id: 3);
+}
+root_type ArmEePose;

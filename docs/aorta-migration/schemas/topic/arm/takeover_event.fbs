@@ -1,0 +1,11 @@
+// Takeover lifecycle event — mirrors robo_orchard_teleop_msg_ros2/TakeOverEvent.
+include "schemas/system/aorta_base.fbs";
+namespace arm;
+table TakeOverEvent {
+  aorta_header: aorta.sys.AortaHeader (id: 0);
+  stamp_ns:     ulong  (id: 1);
+  // "takeover_triggered"|"replay_command_sent"|"release_triggered"|"stop_triggered"
+  event_type:   string (id: 2);
+  details:      string (id: 3);
+}
+root_type TakeOverEvent;

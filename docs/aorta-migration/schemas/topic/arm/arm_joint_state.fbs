@@ -1,0 +1,15 @@
+// Arm joint command/state — JointState-shaped (mirrors sensor_msgs/JointState).
+// Reused for the master->slave command topic AND the state topics; a pure
+// command only fills `position` (+ optional `gripper`), a state fills all.
+include "schemas/system/aorta_base.fbs";
+namespace arm;
+
+table ArmJointState {
+  aorta_header: aorta.sys.AortaHeader (id: 0);
+  stamp_ns:     ulong    (id: 1);   // source/capture time (ns)
+  name:         [string] (id: 2);   // ["joint1".."joint6","gripper"]; empty on lean cmd
+  position:     [double] (id: 3);   // rad; index 6 = gripper (m)
+  velocity:     [double] (id: 4);   // rad/s; empty on lean cmd
+  effort:       [double] (id: 5);   // N·m; empty on lean cmd
+}
+root_type ArmJointState;
