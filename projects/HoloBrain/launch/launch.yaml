@@ -91,7 +91,10 @@ windows:
       - cd $DOCKER_ROBO_ORCHARD_PATH/projects/HoloBrain
     panes:
       - shell_command:  # piper slave (inference only, no master arm)
-        - CMD="bash teleop/rename-can.sh && bash teleop/dagger_infer.sh"
+      # 双臂
+        # - CMD="bash teleop/rename-can.sh && bash teleop/dagger_infer.sh"
+        # 单臂
+        - CMD="bash teleop/rename-can.sh && bash teleop/dagger_master.sh"
         - history -s "$CMD"
         - eval "$CMD"
 

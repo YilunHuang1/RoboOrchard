@@ -2,9 +2,9 @@
 declare -A USB_PORTS
 
 # Left-only single-master/single-slave CAN mapping.
-USB_PORTS["1-2:1.0"]="can_left:1000000"
-# USB_PORTS["3-2.1.4:1.0"]="can_left_mst:1000000"
-USB_PORTS["7-5:1.0"]="can_right:1000000"
+# USB_PORTS["1-2:1.0"]="can_left:1000000"
+USB_PORTS["1-2:1.0"]="can_left_mst:1000000"
+# USB_PORTS["7-5:1.0"]="can_right:1000000"
 
 # Whether to ignore CAN quantity check (default false)
 IGNORE_CHECK=false
